@@ -1,4 +1,5 @@
-= Mac App Store Validation
+Mac App Store Validation
+========================
 
 The code here is based upon the [documentation released by Apple][docs]. It's been de-obfuscated somewhat, but still has enough to give an idea of how one might take it further. The code in the `asn1` folder was generated using the `asn1c` tool using the definitions on the aforementioned Apple document.
 
