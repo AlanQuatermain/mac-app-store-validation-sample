@@ -235,7 +235,7 @@ static inline int thirdCheck( int argc, startup_call_t *theCall, id * dataPtr )
     }
     
     NSString * bidStr = [[[NSString alloc] initWithBytes: (bundle_id->buf + 2) length: (bundle_id->size - 2) encoding: NSUTF8StringEncoding] autorelease];
-    if ( [bidStr isEqualToString: [[NSBundle mainBundle] bundleIdentifier]] == NO )
+    if ( [bidStr isEqualToString: hardcoded_bidStr] == NO )
     {
         free( payload );
         *theCall = (startup_call_t)&exit;
@@ -243,7 +243,7 @@ static inline int thirdCheck( int argc, startup_call_t *theCall, id * dataPtr )
     }
     
     NSString * dvStr = [[[NSString alloc] initWithBytes: (bundle_version->buf + 2) length: (bundle_version->size - 2) encoding: NSUTF8StringEncoding] autorelease];
-    if ( [dvStr isEqualToString: [[[NSBundle mainBundle] infoDictionary] objectForKey: @"CFBundleShortVersionString"]] == NO )
+    if ( [dvStr isEqualToString: hardcoded_dvStr] == NO )
     {
         free( payload );
         *theCall = (startup_call_t)&exit;
@@ -315,8 +315,19 @@ int fourthCheck( int argc, startup_call_t *theCall, id * obj_arg )
     return ( argc );
 }
 
+static NSString* hardcoded_bidStr = @"com.foo.bar";
+static NSString* hardcoded_dvStr = @"1.0";
+
 int main(int argc, char *argv[])
 {
+	
+	if ( [hardcoded_bidStr isEqualToString: [[NSBundle mainBundle] bundleIdentifier]] == NO ){
+		//info.plist integrity check failed
+	}	
+	if ( [hardcoded_dvStr isEqualToString: [[[NSBundle mainBundle] infoDictionary] objectForKey: @"CFBundleShortVersionString"]] == NO ){
+		//info.plist integrity check failed
+	}	
+	
     startup_call_t theCall = &NSApplicationMain;
     id obj_arg = nil;
     argc = firstCheck(argc, &theCall, &obj_arg);
