@@ -51,7 +51,7 @@ typedef int (*startup_call_t)(int, const char **);
 static inline int firstCheck( int argc, startup_call_t *theCall, id * pathPtr )
 {
     struct stat statBuf;
-    *pathPtr = [[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent: @"Contents/_MASReceipt/Receipt"] stringByStandardizingPath];
+    *pathPtr = [[[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent: @"Contents/_MASReceipt/receipt"] stringByStandardizingPath];
     if ( stat([*pathPtr fileSystemRepresentation], &statBuf) != 0 )
     {
         *theCall = (startup_call_t)&exit;
