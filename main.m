@@ -43,6 +43,7 @@
 #import <openssl/x509.h>
 #import <Security/SecKeychainItem.h>
 #import <Security/CodeSigning.h>
+#import <objc/runtime.h>
 #import "Payload.h"
 #import "ethernet.h"
 
@@ -70,8 +71,16 @@ static inline SecCertificateRef AppleRootCA( void )
     SecKeychainRef roots = NULL;
     SecKeychainSearchRef search = NULL;
     SecCertificateRef cert = NULL;
+    BOOL cfReleaseKeychain = YES;
     
+    // there's a GC bug with this guy it seems
     OSStatus err = SecKeychainOpen( "/System/Library/Keychains/SystemRootCertificates.keychain", &roots );
+    if ( [NSGarbageCollector defaultCollector] != nil )
+    {
+        CFMakeCollectable(roots);
+        cfReleaseKeychain = NO;
+    }
+    
     if ( err != noErr )
     {
         CFStringRef errStr = SecCopyErrorMessageString( err, NULL );
@@ -89,6 +98,8 @@ static inline SecCertificateRef AppleRootCA( void )
         CFStringRef errStr = SecCopyErrorMessageString( err, NULL );
         NSLog( @"Error: %d (%@)", err, errStr );
         CFRelease( errStr );
+        if ( cfReleaseKeychain )
+            CFRelease( roots );
         return NULL;
     }
     
@@ -99,12 +110,17 @@ static inline SecCertificateRef AppleRootCA( void )
         CFStringRef errStr = SecCopyErrorMessageString( err, NULL );
         NSLog( @"Error: %d (%@)", err, errStr );
         CFRelease( errStr );
+        if ( cfReleaseKeychain )
+            CFRelease( roots );
+        
         return NULL;
     }
     
     cert = (SecCertificateRef)item;
     CFRelease( search );
-    CFRelease( roots );
+    
+    if ( cfReleaseKeychain )
+        CFRelease( roots );
     
     return ( cert );
 }
